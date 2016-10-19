@@ -83,8 +83,8 @@ ReactDOM.render((
     <Router history={hashHistory} >
         <Route path="/" breadcrumbName="首页" icon="link" component={Init}>
             <IndexRoute component={Welcome}/>
-            <Route path="exams" component={Exams} breadcrumbName="试题"/>
-            <Route path="addexam" component={AddExam} breadcrumbName="添加"/>
+            <Route path="exams" component={Exams} breadcrumbName="问答"/>
+            <Route path="addexam" component={AddExam} breadcrumbName="添加问答"/>
         </Route>
     </Router>
 ), document.querySelector('#init'))

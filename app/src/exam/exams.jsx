@@ -4,7 +4,7 @@ import {Table,Icon,Tooltip, Button, Row, Col} from 'antd';
 import { Link,hashHistory } from 'react-router';
 // import fetchMock from 'fetch-mock';
 
-import {apiRoot, pagerAdapt} from '../common/commonHelper.js'
+import {apiRoot, pagerAdaptor} from '../common/commonHelper.js'
 
 // 引入标准Fetch及IE兼容依赖
 import 'whatwg-fetch';
@@ -15,45 +15,60 @@ import 'fetch-ie8/fetch.js';
 export default class Welcome extends React.Component {
     constructor(props) {
         super(props);
+        var that = this;
         this.state = {
           loading: true,
           pagination: {
               total: 100,
               showSizeChanger: true,
               size: 'large',
+              current: 1,
+              defaultCurrent: 1,
+              pageSize: 10,
+              showTotal: total => `总记录数: ${total}`,
               onShowSizeChange(current, pageSize) {
                   console.log('Current: ', current, '; PageSize: ', pageSize);
+                  that.state.pagination.current = current;
+                  that.state.pagination.pageSize = pageSize;
+                  that.fetchTableData();
               },
               onChange(current) {
+
                   console.log('Current: ', current);
+                  console.log(that.state.pagination);
+                  that.state.pagination.current = current;
+                  console.log(that.state.pagination);
+                  that.fetchTableData();
               }
           },
-          tData : [{
-            title: 't1',
-            answer: 'a1'
-          },{
-            title: 't2',
-            answer: 'a2'
-          }]
+          tData : []
         }
     }
     addExam = (event) => {
       hashHistory.push("/addexam");
     }
     fetchTableData = (postData) => {
-      fetch(apiRoot + '/api/exams',
+      postData = Object.assign({},
+                  {
+                    page: this.state.pagination.current,
+                    size: this.state.pagination.pageSize
+                  }, postData);
+      var esc = encodeURIComponent;
+      var query = Object.keys(postData)
+          .map(k => esc(k) + '=' + esc(postData[k]))
+          .join('&');
+      fetch(apiRoot + '/api/exams?' + query,
         {
               method: 'get', mode: 'cors',
               headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(postData)
+              }
         }).then((res) => {
           return res.json();
         }).then((data) => {
           this.setState({tData: data.exams, loading: false});
-          this.setState({pagination: pagerAdapt(this.state.pagination, data.page)});
+          this.setState({pagination: pagerAdaptor.getPagerFromRemote(this.state.pagination, data.page)});
         });
 
 
