@@ -17,6 +17,9 @@ const SubMenu = Menu.SubMenu;
 import Welcome from './welcome/welcome.jsx';
 import Exams from './exam/exams.jsx';
 import AddExam from './exam/addExam.jsx'
+import Categories from './category/Categories.jsx'
+import AddCategory from './category/AddCategory.jsx'
+import EditCategory from './category/EditCategory.jsx'
 
 // 引入Ant-Design样式 & Animate.CSS样式 & font-awesome样式
 import 'antd/dist/antd.min.css';
@@ -53,6 +56,7 @@ class Init extends React.Component {
                       <Icon type="cloud" style={{fontSize: 40, verticalAlign: 'middle'}}/>
                       <label style={{verticalAlign: 'middle', fontSize: '18'}}> 控制台</label>
                     </div>  {/*logo图标*/}
+
                     <Menu onClick={this.handleClick}
                         style={{ width: 146 }}
                         defaultOpenKeys={['问答']}
@@ -62,8 +66,11 @@ class Init extends React.Component {
                         <Menu.Item key="1">
                             <IndexLink to="/"><span><Icon type="home" /><span>首页</span></span></IndexLink>
                         </Menu.Item>
+                        <SubMenu key="分类" title={<span><Icon type="book" /><span>分类</span></span>}>
+                            <Menu.Item key="Categories"><Link to="/categories/">- 分类列表</Link></Menu.Item>
+                        </SubMenu>
                         <SubMenu key="问答" title={<span><Icon type="question-circle" /><span>问答</span></span>}>
-                            <Menu.Item key="Exams"><Link to="/exams/">问答列表</Link></Menu.Item>
+                            <Menu.Item key="Exams"><Link to="/exams/">- 问答列表</Link></Menu.Item>
                         </SubMenu>
                     </Menu>
                 </div>
@@ -85,6 +92,9 @@ ReactDOM.render((
             <IndexRoute component={Welcome}/>
             <Route path="exams" component={Exams} breadcrumbName="问答"/>
             <Route path="addexam" component={AddExam} breadcrumbName="添加问答"/>
+            <Route path="categories" component={Categories} breadcrumbName="分类"/>
+            <Route path="addCategory" component={AddCategory} breadcrumbName="添加分类"/>
+            <Route path="editCategory/:id" component={EditCategory} breadcrumbName="修改分类"/>
         </Route>
     </Router>
 ), document.querySelector('#init'))
