@@ -84,13 +84,81 @@ export default class Categories extends React.Component {
         sortedInfo: sorter,
       });
     }
-    handleDeleteSelected = (e) => {
-
+    handleDeleteSelected = (ids) => {
+      fetch(apiRoot + '/api/categories/delete/selected', {
+          method: 'post',
+          mode: 'cors',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': generateAuthorization(constants.role.ADMIN)
+          },
+          body: JSON.stringify({ids: ids})
+      }).then((res) => {
+          return res.json();
+      }).then((data) => {
+          message.success('删除成功');
+          this.setState({selectedRowKeys: []});
+          this.fetchTableData();
+      });
     }
     onSelectChange = (selectedRowKeys) => {
       console.log('selectedRowKeys changed: ', selectedRowKeys);
       this.setState({ selectedRowKeys });
     }
+
+    updateSort = () => {
+      var data = this.state.tData,
+          ids = [];
+      for(var i = 0; i < data.length; i++){
+          ids.push(data[i].id);
+      }
+      fetch(apiRoot + '/api/categories/all/sort', {
+          method: 'post',
+          mode: 'cors',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': generateAuthorization(constants.role.ADMIN)
+          },
+          body: JSON.stringify({ids: ids})
+      }).then((res) => {
+          return res.json();
+      }).then((data) => {
+          message.success('排序已更新');
+      });
+    }
+
+    sortUp = (id) => {
+
+        var data = this.state.tData;
+        for(var i = 0; i < data.length; i++){
+          if(data[i].id === id){
+            if(i === 0) break;
+            let temp = data[i-1];
+            data[i-1] = data[i];
+            data[i] = temp;
+          }
+        }
+        this.setState({tData: data});
+        this.updateSort();
+    }
+    sortDown = (id) => {
+      console.log(id);
+      var data = this.state.tData;
+
+      for(var i = 0; i < data.length; i++){
+        if(data[i].id === id){
+          if(i === data.length-1) break;
+          let temp = data[i+1];
+          data[i+1] = data[i];
+          data[i] = temp;
+        }
+      }
+      this.setState({tData: data});
+      this.updateSort();
+    }
+
     fetchTableData = (postData) => {
         postData = Object.assign({}, {
             page: this.state.pagination.current,
@@ -154,10 +222,15 @@ export default class Categories extends React.Component {
                 dataIndex: 'handle',
                 render: (text, record, index) => (
                     <span>
-                        <Tooltip title="Lost">
+                        <Tooltip title="往上">
+                          <Link onClick={()=>this.sortUp(record.id)}><i className="fa fa-arrow-up"/></Link>
+                        </Tooltip>&nbsp;&nbsp;
+                        <Tooltip  title="往下">
+                          <Link onClick={()=>this.sortDown(record.id)}><i className="fa fa-arrow-down"/></Link>
+                        </Tooltip>&nbsp;&nbsp;
+                        <Tooltip title="修改">
                             <Link to={"/editCategory/"+ record.id}><i className="fa fa-pencil"/></Link>
                         </Tooltip>&nbsp;&nbsp;
-
                         <Popconfirm title="确认要删除此项吗?" onConfirm={()=>this.handleOk(record.id)} onCancel={()=>{}} okText="确定" cancelText="取消">
                           <a href="#"><i className="fa fa-trash" style={{color: '#FD5B5B'}}/></a>
                         </Popconfirm>
@@ -171,9 +244,12 @@ export default class Categories extends React.Component {
 
                 <div style={{ marginBottom: 16 }}>
                   <Button type="primary" onClick={this.addCategory} icon="plus">添加</Button>
-                  <Button type="primary" style={{ marginLeft: 10 }} onClick={this.handleDeleteSelected}
-                    disabled={!hasSelected} loading={loading}
-                  >批量删除</Button>
+                  <Popconfirm title="确认要删除此项吗?" onConfirm={()=>this.handleDeleteSelected(selectedRowKeys)} onCancel={()=>{}} okText="确定" cancelText="取消">
+                    <Button type="primary" style={{ marginLeft: 10 }}
+                      disabled={!hasSelected} loading={loading}
+                    >批量删除</Button>
+                  </Popconfirm>
+
                   <span style={{ marginLeft: 8 }}>{hasSelected ? `选中 ${selectedRowKeys.length} 项` : ''}</span>
                 </div>
                 <div id="table">
