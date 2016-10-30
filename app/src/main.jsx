@@ -24,6 +24,9 @@ import AddExam from './exam/addExam.jsx'
 import Categories from './category/Categories.jsx'
 import AddCategory from './category/AddCategory.jsx'
 import EditCategory from './category/EditCategory.jsx'
+import Navigations from './navigation/Navigations.jsx'
+import AddNavigation from './navigation/AddNavigation.jsx'
+import EditNavigation from './navigation/EditNavigation.jsx'
 
 // 引入Ant-Design样式 & Animate.CSS样式 & font-awesome样式
 import 'antd/dist/antd.min.css';
@@ -70,6 +73,9 @@ class Init extends React.Component {
                         <Menu.Item key="1">
                             <IndexLink to="/"><span><Icon type="home" /><span>首页</span></span></IndexLink>
                         </Menu.Item>
+                        <SubMenu key="导航" title={<span><Icon type="book" /><span>导航</span></span>}>
+                            <Menu.Item key="Navigations"><Link to="/navigations/">导航列表</Link></Menu.Item>
+                        </SubMenu>
                         <SubMenu key="分类" title={<span><Icon type="book" /><span>分类</span></span>}>
                             <Menu.Item key="Categories"><Link to="/categories/">分类列表</Link></Menu.Item>
                         </SubMenu>
@@ -100,9 +106,13 @@ ReactDOM.render((
     <Router history={hashHistory} >
         <Route path="/" breadcrumbName="首页" icon="link" component={Init}>
             <IndexRoute component={Welcome}/>
+            <Route path="navigations" component={Navigations} breadcrumbName="导航"/>
+            <Route path="addNavigation" component={AddNavigation} breadcrumbName="添加导航"/>
+            <Route path="editNavigation/:id" component={EditNavigation} breadcrumbName="修改导航"/>
             <Route path="categories" component={Categories} breadcrumbName="分类"/>
             <Route path="addCategory" component={AddCategory} breadcrumbName="添加分类"/>
             <Route path="editCategory/:id" component={EditCategory} breadcrumbName="修改分类"/>
+
             <Route path="users" component={Users} breadcrumbName="用户"/>
             <Route path="articles" component={Articles} breadcrumbName="文章"/>
             <Route path="addArticle" component={AddArticle} breadcrumbName="添加文章"/>
