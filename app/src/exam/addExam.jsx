@@ -15,7 +15,7 @@ export default class AddExam extends React.Component{
   render(){
     return (
       <div id="wrap">
-        <ExamForm/>
+        <ExamForm type="add"/>
       </div>
     )
   }

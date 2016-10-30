@@ -1,18 +1,20 @@
 import React from 'react';
 
-import {Button, Row, Col, Form, Input, Checkbox, Radio, Tooltip, Icon, Modal} from 'antd';
+import {Button,Select, Row, Col, Form, Input, Checkbox, Radio, Tooltip, Icon, Modal} from 'antd';
 import { Link,hashHistory } from 'react-router';
 import {apiRoot, constants, generateAuthorization} from '../common/commonHelper.js'
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const Option = Select.Option;
 
 class ExamForm extends React.Component{
   constructor(props){
       super(props);
       this.state = {
           visible : false,
-          showModel: false
+          showAddModel: false,
+          categories: []
       }
   }
 
@@ -25,9 +27,27 @@ class ExamForm extends React.Component{
 
   handleCancel = () => {
     this.setState({
-      showModel: false,
+      showAddModel: false,
     });
     this.handleReset();
+  }
+
+  getCategories = () => {
+    fetch(apiRoot + '/api/categories',
+    {
+          method: 'get', mode: 'cors',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': generateAuthorization(constants.role.EDITOR)
+          }
+    }).then((res) => {
+      return res.json();
+    }).then((data) => {
+      this.setState({categories: data.categories});
+      console.log(data.categories);
+      // this.goBack();
+    })
   }
 
   goBack = (event) => {
@@ -38,6 +58,38 @@ class ExamForm extends React.Component{
       this.props.form.resetFields();
   }
   handleSubmit = (e) => {
+    if(this.props.type === 'add'){
+      this.submitAdd(e);
+    }else{
+      this.submitEdit(e);
+    }
+  }
+  submitEdit = (e) => {
+    e.preventDefault();
+    this.props.form.validateFields((errors, values) => {
+      if (errors) {
+        console.log('Errors in form!!!');
+        return;
+      }
+      // console.log('Received values of form:', this.props.form.getFieldsValue());
+      fetch(apiRoot + '/api/exams/' + this.props.examId,
+      {
+            method: 'post', mode: 'cors',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': generateAuthorization(constants.role.EDITOR)
+            },
+            body: JSON.stringify(this.props.form.getFieldsValue())
+      }).then((res) => {
+        return res.json();
+      }).then((data) => {
+        message.success('修改成功');
+        setTimeout(()=>{this.goBack();}, 1000);
+      })
+    });
+  }
+  submitAdd = (e) => {
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (errors) {
@@ -57,19 +109,27 @@ class ExamForm extends React.Component{
       }).then((res) => {
         return res.json();
       }).then((data) => {
-        this.setState({showModel: true});
-        // this.goBack();
+        this.setState({showAddModel: true});
       })
     });
-
   }
-
+  checkCategory = (rule, value, callback) => {
+    if(value === '请选择'){
+      callback(new Error("请选择分类"));
+    }else{
+      callback();
+    }
+  }
+  componentDidMount() {
+      this.getCategories();
+  }
   render(){
-    const { getFieldDecorator } = this.props.form;
-    const formItemLayout = {
-      labelCol: { span: 6 },
-      wrapperCol: { span: 14 },
-    };
+    const { getFieldDecorator } = this.props.form,
+          formItemLayout = {
+            labelCol: { span: 6 },
+            wrapperCol: { span: 14 },
+          },
+          categoryOptions = this.state.categories.map(category => <Option key={category.id}>{category.name}</Option>);
 
     return (
       <div>
@@ -89,10 +149,26 @@ class ExamForm extends React.Component{
           </FormItem>
           <FormItem
             {...formItemLayout}
+            label="分类"
+          >
+            {getFieldDecorator('category_id', { initialValue: '请选择',
+              rules: [
+                { required: true, message: '请选择分类' },
+                { validator: this.checkCategory}
+              ],
+            })(
+              <Select style={{ width: 120 }} >
+                <Option key="请选择">请选择</Option>
+                {categoryOptions}
+              </Select>
+            )}
+          </FormItem>
+          <FormItem
+            {...formItemLayout}
             label="描述"
 
           >
-            {getFieldDecorator('desc', { initialValue: '' ,
+            {getFieldDecorator('description', { initialValue: '' ,
                 rules: [
                   { required: true, min: 5, message: '描述不能少于五个字符' },
                 ],
@@ -118,7 +194,7 @@ class ExamForm extends React.Component{
             <Button type="ghost"  onClick={this.handleReset} style={{marginLeft:10}}>重置</Button>
           </FormItem>
         </Form>
-        <Modal title="Modal" visible={this.state.showModel}
+        <Modal title="操作结果" visible={this.state.showAddModel}
           onOk={this.handleOk} onCancel={this.handleCancel}
           okText="返回列表" cancelText="继续添加"
         >

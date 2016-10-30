@@ -41,4 +41,22 @@ var pagerAdaptor = {
   }
 
 }
-export {apiRoot, pagerAdaptor, generateAuthorization, constants}
+
+var dateHelper = {
+  toDate: function(timestamp){
+    var date = new Date(timestamp),
+        year = date.getYear() + 1900,
+        month = date.getMonth() + 1,
+        d = date.getDate(),
+        // Hours part from the timestamp
+        hours = date.getHours(),
+        // Minutes part from the timestamp
+        minutes = "0" + date.getMinutes(),
+        // Seconds part from the timestamp
+        seconds = "0" + date.getSeconds();
+
+    return year + '-' + month + '-' + d + ' ' + hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+  }
+}
+
+export {apiRoot, pagerAdaptor, generateAuthorization, constants, dateHelper}

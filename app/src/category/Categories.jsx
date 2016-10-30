@@ -108,25 +108,25 @@ export default class Categories extends React.Component {
     }
 
     updateSort = () => {
-      var data = this.state.tData,
-          ids = [];
-      for(var i = 0; i < data.length; i++){
-          ids.push(data[i].id);
-      }
-      fetch(apiRoot + '/api/categories/all/sort', {
-          method: 'post',
-          mode: 'cors',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': generateAuthorization(constants.role.ADMIN)
-          },
-          body: JSON.stringify({ids: ids})
-      }).then((res) => {
-          return res.json();
-      }).then((data) => {
-          message.success('排序已更新');
-      });
+      // var data = this.state.tData,
+      //     ids = [];
+      // for(var i = 0; i < data.length; i++){
+      //     ids.push(data[i].id);
+      // }
+      // fetch(apiRoot + '/api/categories/all/sort', {
+      //     method: 'post',
+      //     mode: 'cors',
+      //     headers: {
+      //         'Accept': 'application/json',
+      //         'Content-Type': 'application/json',
+      //         'Authorization': generateAuthorization(constants.role.ADMIN)
+      //     },
+      //     body: JSON.stringify({ids: ids})
+      // }).then((res) => {
+      //     return res.json();
+      // }).then((data) => {
+      //     message.success('排序已更新');
+      // });
     }
 
     sortUp = (id) => {
@@ -254,7 +254,7 @@ export default class Categories extends React.Component {
                 </div>
                 <div id="table">
                     <Table rowKey={record => record.id} rowSelection={rowSelection} dataSource={this.state.tData} columns={columns} size="middle" pagination={this.state.pagination} onRowClick={this.rowClick}
-                    onChange={this.handleChange} loading={this.state.loading}/>
+                    onChange={this.handleChange} />
                 </div>
 
             </div>

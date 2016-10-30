@@ -124,7 +124,7 @@ class CategoryForm extends React.Component{
                 { required: true, min: 5, message: '名称不能少于五个字符' },
               ],
             })(
-              <Input type="textarea" placeholder="请输入名称" />
+              <Input type="text" placeholder="请输入名称" />
             )}
           </FormItem>
           <FormItem

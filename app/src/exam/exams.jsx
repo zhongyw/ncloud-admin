@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {Table,Icon,Tooltip, Button, Row, Col} from 'antd';
+import {Table,Icon,Tooltip, Button, Row, Col, Popconfirm, message} from 'antd';
 import { Link,hashHistory } from 'react-router';
 // import fetchMock from 'fetch-mock';
 
-import {apiRoot, pagerAdaptor} from '../common/commonHelper.js'
+import {apiRoot, pagerAdaptor, constants, generateAuthorization} from '../common/commonHelper.js'
 
 // 引入标准Fetch及IE兼容依赖
 import 'whatwg-fetch';
@@ -18,6 +18,7 @@ export default class Welcome extends React.Component {
         var that = this;
         this.state = {
           loading: true,
+          selectedRowKeys: [],
           pagination: {
               total: 100,
               showSizeChanger: true,
@@ -73,12 +74,41 @@ export default class Welcome extends React.Component {
 
 
     }
-
+    handleDeleteSelected = (ids) => {
+      fetch(apiRoot + '/api/exams/delete/selected', {
+          method: 'post',
+          mode: 'cors',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': generateAuthorization(constants.role.ADMIN)
+          },
+          body: JSON.stringify({ids: ids})
+      }).then((res) => {
+          return res.json();
+      }).then((data) => {
+          message.success('删除成功');
+          this.setState({selectedRowKeys: []});
+          this.fetchTableData();
+      });
+    }
+    onSelectChange = (selectedRowKeys) => {
+      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      this.setState({ selectedRowKeys });
+    }
     componentDidMount(){
       this.fetchTableData();
     }
 
     render() {
+      const { loading, selectedRowKeys } = this.state;
+
+      const rowSelection = {
+        selectedRowKeys,
+        onChange: this.onSelectChange,
+      };
+
+      const hasSelected = selectedRowKeys.length > 0;
       /*定义表格列*/
       const columns = [{
             title: '问题',
@@ -86,6 +116,9 @@ export default class Welcome extends React.Component {
         }, {
             title: '答案',
             dataIndex: 'answer'
+        },{
+            title: '用户',
+            dataIndex: 'user_name'
         },{
             title: '操作',
             dataIndex: 'handle',
@@ -99,16 +132,24 @@ export default class Welcome extends React.Component {
         }];
         return (
           <div id="wrap">
-              <Button type="primary" onClick={this.addExam} icon="plus" style={{marginBottom: 5}}>添加</Button>
+              <div style={{ marginBottom: 16 }}>
+                <Button type="primary" onClick={this.addExam} icon="plus">添加</Button>
+                <Popconfirm title="确认要删除此项吗?" onConfirm={()=>this.handleDeleteSelected(selectedRowKeys)} onCancel={()=>{}} okText="确定" cancelText="取消">
+                  <Button type="primary" style={{ marginLeft: 10 }}
+                    disabled={!hasSelected} loading={loading}
+                  >批量删除</Button>
+                </Popconfirm>
+              </div>
               <div id="table">
                   <Table
-                      rowSelection={{}}
+                      rowKey={record => record.id}
+                      rowSelection={rowSelection}
                       dataSource={this.state.tData}
                       columns={columns}
                       size="middle"
                       pagination={this.state.pagination}
                       onRowClick={this.rowClick}
-                      loading={this.state.loading}
+                      onChange={this.handleChange}
                   />
               </div>
           </div>
