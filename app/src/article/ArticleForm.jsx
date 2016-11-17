@@ -120,7 +120,6 @@ class ArticleForm extends React.Component{
       return res.json();
     }).then((data) => {
       this.setState({categories: data.categories});
-      console.log(data.categories);
       // this.goBack();
     })
   }
